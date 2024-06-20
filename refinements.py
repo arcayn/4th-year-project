@@ -95,7 +95,7 @@ def CAVI(A, prior, model, warm_up = 0, m = 25, symm = False):
             #print(M0[:10], M0[-10:])
     return M
 
-def BP(A, prior, model, warm_up = 0, m = 25, symm = False):
+def BP(A, prior, model, warm_up = 0, m = 25, symm = False, verbose = False):
     M = np.copy(prior)
     N = len(A)
     pi = model.pi
@@ -143,7 +143,9 @@ def BP(A, prior, model, warm_up = 0, m = 25, symm = False):
             if abs(old_elbo - elbo) < 1e-3: elbo_cnt += 1
             else: elbo_cnt = 0
             old_elbo = elbo
-            if elbo_cnt >= 3: break
+            if elbo_cnt >= 3: 
+                if verbose: print (f"Converged after {iter} iterations...")
+                break
             #print (iter, elbo)
             #print(M0[:10], M0[-10:])
 

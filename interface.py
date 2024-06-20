@@ -98,7 +98,7 @@ class SpectralPipeline:
             case _:
                 return spectral_clusterings.trivial_clustering(embedded)
     
-    def do_refine(self, A, prior, max_iter = None, warm_up = None):
+    def do_refine(self, A, prior, max_iter = None, warm_up = None, verbose = False):
         match self.refiner:
             case "gibbs":
                 if warm_up is None: warm_up = 50_000
@@ -111,24 +111,24 @@ class SpectralPipeline:
             case "bp":
                 warm_up = 0
                 if max_iter is None: max_iter = 1_000
-                return refinements.BP(A, prior, self.model, warm_up, max_iter, self.model.is_symmetric)
+                return refinements.BP(A, prior, self.model, warm_up, max_iter, self.model.is_symmetric, verbose)
             case "sp":
                 if warm_up is None: warm_up = 100
                 if max_iter is None: max_iter = 100
                 return refinements.SP_refine(A, prior, self.model, warm_up, max_iter, self.model.is_symmetric)
 
-    def predict_(self, A, max_iter = None, warm_up = None):
+    def predict_(self, A, max_iter = None, warm_up = None, verbose = False):
         G = self.do_transform(A)
         prior = self.do_spec_cluster(G)
-        return self.do_refine(A, prior, max_iter, warm_up)
+        return self.do_refine(A, prior, max_iter, warm_up, verbose)
     
-    def predict(self, A, max_iter = None, warm_up = None):
+    def predict(self, A, max_iter = None, warm_up = None, verbose = False):
         if len(A.shape) == 2:
             return self.predict_(A, max_iter, warm_up)
         
         preds = np.zeros((A.shape[0], A.shape[1])) 
         for i in range(len(A)):
-            preds[i] = self.predict_(A[i], max_iter, warm_up)
+            preds[i] = self.predict_(A[i], max_iter, warm_up, verbose)
         return preds
 
 def build_model(alt_dist, alt_params, pi, symmetric, label = ""):
